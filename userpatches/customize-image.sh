@@ -8,7 +8,6 @@ RECORE_REVISION="a7"
 PACKAGES_FOR_INSTALL=("unzip", "libavahi-compat-libdnssd1", "libnss-mdns", "byobu", "htop", "cpufrequtils", "pv")
 PACKAGES_FOR_REMOVAL=("smartmontools")
 SCRIPT_PATH="/usr/local/bin"
-LIST_OF_SCRIPTS=("get-boot-media", "get-recore-config", "get-recore-serial-number", "get-rootfs", "is-media-present", "is-ssh-enabled", "refactor-apt-upgrade", "set-boot-media", "set-ssh-access", "use-recore-revision")
 
 # Build variables
 # RELEASE=$1
@@ -46,7 +45,7 @@ recore_device_tree() {
 
 	# Copy device tree files
 	for file in "${dtb_files[@]}"; do
-		mv /tmp/overlay/"${file[@]##*/}" "$dtb_path/${file[@]##*/}"
+		cp /tmp/overlay/dtb_files/"${file[@]##*/}" "$dtb_path/${file[@]##*/}"
 	done
 	# symlink revision
 	ln -s -f "$dtb_path/sun50i-a64-recore.dtb" "$dtb_path/sun50i-a64-recore-$RECORE_REVISION.dtb"
@@ -74,7 +73,7 @@ user_configuration() {
 	chpasswd <<<"root:$DEFAULT_ROOT_PASSWORD"
 
 	# debian user
-	useradd -m -s /bin/bash debian
+	usedadd -m -s /bin/bash debian
 	usermod -aG sudo,tty,dialout debian
 	chown -R debian:debian /home/debian
 	chpasswd <<<"debian:$DEFAULT_USER_PASSWORD"
@@ -88,12 +87,15 @@ user_configuration() {
 }
 
 install_recore_scripts() {
-	recore_scripts_src_path="/tmp/overlay"
+	recore_scripts_src_path="userpatches/extensions/overlay/recore_scripts"
 	# We should download the files from somewhere to get them all
-	for file in $LIST_OF_SCRIPTS
-	do
-		cp "$recore_scripts_src_path/$file" "$SCRIPT_PATH/$file"
-		chmod 0755 "$SCRIPT_PATH/$file"
+	# Glob scripts
+	recore_script_files=("$recore_scripts_src_path"/*) # grab the list
+	echo "Found ${#recore_script_files[@]} files"      # print array length
+	# Copy device tree files
+	for file in "${recore_script_files[@]}"; do
+		cp "$recore_scripts_src_path/${file[@]##*/}" "$SCRIPT_PATH/${file[@]##*/}"
+		chmod 0755 "$SCRIPT_PATH/${file[@]##*/}"
 	done
 }
 
