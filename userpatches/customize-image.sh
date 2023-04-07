@@ -73,7 +73,7 @@ user_configuration() {
 	chpasswd <<<"root:$DEFAULT_ROOT_PASSWORD"
 
 	# debian user
-	usedadd -m -s /bin/bash debian
+	useradd -m -s /bin/bash debian
 	usermod -aG sudo,tty,dialout debian
 	chown -R debian:debian /home/debian
 	chpasswd <<<"debian:$DEFAULT_USER_PASSWORD"
